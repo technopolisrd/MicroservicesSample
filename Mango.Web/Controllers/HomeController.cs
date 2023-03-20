@@ -31,6 +31,19 @@ namespace Mango.Web.Controllers
             return View(products);
         }
 
+        [Authorize]
+        public async Task<IActionResult> Details(int ProductId)
+        {
+            ProductDTO product = new();
+            var response = await _productService.GetProductsByIdAsync<ResponseDTO>(ProductId,"");
+            if (response != null && response.IsSuccess)
+            {
+                product = JsonConvert.DeserializeObject<ProductDTO>(Convert.ToString(response.Result));
+            }
+
+            return View(product);
+        }
+
         public IActionResult Privacy()
         {
             return View();
