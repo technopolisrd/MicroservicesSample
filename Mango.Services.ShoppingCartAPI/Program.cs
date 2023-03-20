@@ -1,8 +1,8 @@
-using Mango.Services.ProductAPI.DbContexts;
-using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using Mango.Services.ProductAPI;
-using Mango.Services.ProductAPI.Repository;
+using Mango.Services.ShoppingCartAPI;
+using Mango.Services.ShoppingCartAPI.DbContexts;
+using Mango.Services.ShoppingCartAPI.Repository;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -19,7 +19,7 @@ IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
 
 builder.Services.AddControllers();
 
@@ -38,7 +38,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ApiScope", policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.RequireClaim("scope","mango");
+        policy.RequireClaim("scope", "mango");
     });
 });
 
@@ -46,15 +46,15 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title="Mango.Services.ProductAPI", Version="v1"});
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mango.Services.ShoppingCartAPI", Version = "v1" });
     c.EnableAnnotations();
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description=@"Enter 'Bearer' [space] and your token",
-        Name="Authorization",
-        In=ParameterLocation.Header,
-        Type=SecuritySchemeType.ApiKey,
-        Scheme="Bearer"
+        Description = @"Enter 'Bearer' [space] and your token",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
