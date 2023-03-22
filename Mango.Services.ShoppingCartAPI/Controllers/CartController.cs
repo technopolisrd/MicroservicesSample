@@ -1,23 +1,25 @@
 ﻿using Mango.Services.ShoppingCartAPI.Models.DTO;
 using Mango.Services.ShoppingCartAPI.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers;
 
 [ApiController]
 [Route("api/cart")]
-public class CartController : Controller
+public class CartController : ControllerBase
 {
     private readonly ICartRepository _cartRepository;
     protected ResponseDTO _response;
 
-    public CartController(ICartRepository cartRepository, ResponseDTO _response)
+    public CartController(ICartRepository cartRepository)
     {
         _cartRepository = cartRepository;
         this._response = new ResponseDTO();
     }
 
     [HttpGet("GetCart/{userId}")]
+    [Authorize]
     public async Task<object> GetCart(string userId)
     {
         try
@@ -34,12 +36,13 @@ public class CartController : Controller
     }
 
     [HttpPost("AddCart")]
+    [Authorize]
     public async Task<object> AddCart(CartDTO cartDTO)
     {
         try
         {
-            CartDTO cartDto = await _cartRepository.CreateUpdateCart(cartDTO);
-            _response.Result = cartDto;
+            CartDTO cartDt = await _cartRepository.CreateUpdateCart(cartDTO);
+            _response.Result = cartDt;
         }
         catch (Exception ex)
         {
@@ -50,6 +53,7 @@ public class CartController : Controller
     }
 
     [HttpPost("UpdateCart")]
+    [Authorize]
     public async Task<object> UpdateCart(CartDTO cartDTO)
     {
         try
@@ -66,6 +70,7 @@ public class CartController : Controller
     }
 
     [HttpPost("RemoveCart")]
+    [Authorize]
     public async Task<object> RemoveCart([FromBody]int cartId)
     {
         try

@@ -1,6 +1,7 @@
 ﻿using Mango.Web.Models;
 using Mango.Web.Services.IServices;
 using Newtonsoft.Json;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -21,7 +22,8 @@ public class BaseService : IBaseService
     {
         try
         {
-            var client = _httpClient.CreateClient("MangoAPI");            
+            var client = _httpClient.CreateClient("MangoAPI");
+            client.DefaultRequestHeaders.ExpectContinue = false;
             HttpRequestMessage message = new HttpRequestMessage();            
             message.Headers.Add("Accept", "application/json");
             message.RequestUri = new Uri(apiRequest.Url);

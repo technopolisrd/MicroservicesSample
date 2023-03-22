@@ -3,112 +3,111 @@ using Mango.Services.ProductAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Mango.Services.ProductAPI.Controllers
+namespace Mango.Services.ProductAPI.Controllers;
+
+[Route("api/products")]
+public class ProductAPIController : ControllerBase
 {
-    [Route("api/products")]
-    public class ProductAPIController : ControllerBase
+    protected ResponseDTO _response;
+    private IProductRepository _productRepository;
+
+    public ProductAPIController(IProductRepository productRepository)
     {
-        protected ResponseDTO _response;
-        private IProductRepository _productRepository;
+        _productRepository = productRepository;
+        this._response = new ResponseDTO();
+    }
 
-        public ProductAPIController(IProductRepository productRepository)
+    [HttpGet]
+    public async Task<object> Get()
+    {
+        try
         {
-            _productRepository = productRepository;
-            this._response = new ResponseDTO();
+            IEnumerable<ProductDTO> productDTOs = await _productRepository.GetProducts();
+            _response.Result = productDTOs;
+        }
+        catch (Exception ex)
+        {
+
+            _response.IsSuccess = false;
+            _response.ErrorMessages = new List<string>() { ex.ToString() };
         }
 
-        [HttpGet]
-        public async Task<object> Get()
+        return _response;
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public async Task<object> Get(int id)
+    {
+        try
         {
-            try
-            {
-                IEnumerable<ProductDTO> productDTOs = await _productRepository.GetProducts();
-                _response.Result = productDTOs;
-            }
-            catch (Exception ex)
-            {
+            ProductDTO productDTO = await _productRepository.GetProductById(id);
+            _response.Result = productDTO;
+        }
+        catch (Exception ex)
+        {
 
-                _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
+            _response.IsSuccess = false;
+            _response.ErrorMessages = new List<string>() { ex.ToString() };
         }
 
-        [HttpGet]
-        [Route("{id}")]
-        public async Task<object> Get(int id)
+        return _response;
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<object> Post([FromBody] ProductDTO productDTO)
+    {
+        try
         {
-            try
-            {
-                ProductDTO productDTO = await _productRepository.GetProductById(id);
-                _response.Result = productDTO;
-            }
-            catch (Exception ex)
-            {
+            ProductDTO model = await _productRepository.CreateUpdateProduct(productDTO);
+            _response.Result = model;
+        }
+        catch (Exception ex)
+        {
 
-                _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
+            _response.IsSuccess = false;
+            _response.ErrorMessages = new List<string>() { ex.ToString() };
         }
 
-        [HttpPost]
-        [Authorize]
-        public async Task<object> Post([FromBody] ProductDTO productDTO)
+        return _response;
+    }
+
+    [HttpPut]
+    [Authorize]
+    public async Task<object> Put([FromBody] ProductDTO productDTO)
+    {
+        try
         {
-            try
-            {
-                ProductDTO model = await _productRepository.CreateUpdateProduct(productDTO);
-                _response.Result = model;
-            }
-            catch (Exception ex)
-            {
+            ProductDTO model = await _productRepository.CreateUpdateProduct(productDTO);
+            _response.Result = model;
+        }
+        catch (Exception ex)
+        {
 
-                _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
+            _response.IsSuccess = false;
+            _response.ErrorMessages = new List<string>() { ex.ToString() };
         }
 
-        [HttpPut]
-        [Authorize]
-        public async Task<object> Put([FromBody] ProductDTO productDTO)
+        return _response;
+    }
+
+    [HttpDelete]
+    [Authorize(Roles = "Admin")]
+    [Route("{id}")]
+    public async Task<object> Delete(int id)
+    {
+        try
         {
-            try
-            {
-                ProductDTO model = await _productRepository.CreateUpdateProduct(productDTO);
-                _response.Result = model;
-            }
-            catch (Exception ex)
-            {
-
-                _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
+            bool isSuccess = await _productRepository.DeleteProduct(id);
+            _response.Result = isSuccess;
+        }
+        catch (Exception ex)
+        {
+            _response.IsSuccess = false;
+            _response.ErrorMessages = new List<string>() { ex.ToString() };
         }
 
-        [HttpDelete]
-        [Authorize(Roles = "Admin")]
-        [Route("{id}")]
-        public async Task<object> Delete(int id)
-        {
-            try
-            {
-                bool isSuccess = await _productRepository.DeleteProduct(id);
-                _response.Result = isSuccess;
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
-            }
-
-            return _response;
-        }
+        return _response;
     }
 }
