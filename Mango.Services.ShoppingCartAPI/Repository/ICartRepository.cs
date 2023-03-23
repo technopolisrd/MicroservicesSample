@@ -9,5 +9,7 @@ public interface ICartRepository
     Task<CartDTO> CreateUpdateCart(CartDTO cartDTO);
     Task<bool> RemoveFromCart(int cartDetailsId);
     Task<bool> ClearCart(string userId);
+    Task<bool> ApplyCoupon(string userID, string couponCode);
+    Task<bool> RemoveCoupon(string userID);
 
 }

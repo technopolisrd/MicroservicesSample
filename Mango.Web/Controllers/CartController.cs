@@ -2,6 +2,7 @@
 using Mango.Web.Services.IServices;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 
 namespace Mango.Web.Controllers
@@ -10,16 +11,48 @@ namespace Mango.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICartService _cartService;
+        private readonly ICouponService _couponService;
 
-        public CartController(IProductService productService, ICartService cartService)
+        public CartController(IProductService productService, ICartService cartService, ICouponService couponService)
         {
             this._productService = productService;
             _cartService = cartService;
+            _couponService = couponService;
         }
 
         public async Task<IActionResult> CartIndex()
         {
             return View(await LoadCartDtoBasedOnLoggedInUser());
+        }
+
+        [HttpPost]
+        [ActionName("ApplyCoupon")]
+        public async Task<IActionResult> ApplyCoupon(CartDTO cartDTO)
+        {
+            var userId = User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value;
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+            var response = await _cartService.ApplyCoupon<ResponseDTO>(cartDTO, accessToken);
+
+            if (response != null && response.IsSuccess)
+            {
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ActionName("RemoveCoupon")]
+        public async Task<IActionResult> RemoveCoupon(CartDTO cartDTO)
+        {
+            var userId = User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value;
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+            var response = await _cartService.RemoveCoupon<ResponseDTO>(cartDTO.CartHeader.UserId, accessToken);
+
+            if (response != null && response.IsSuccess)
+            {
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
         }
 
         public async Task<IActionResult> Remove(int cartDetailId)
@@ -33,6 +66,12 @@ namespace Mango.Web.Controllers
                 return RedirectToAction(nameof(CartIndex));
             }
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Checkout()
+        {
+            return View(await LoadCartDtoBasedOnLoggedInUser());
         }
 
         private async Task<CartDTO> LoadCartDtoBasedOnLoggedInUser()
@@ -49,10 +88,22 @@ namespace Mango.Web.Controllers
 
             if (cartDTO.CartHeader != null)
             {
+
+                if (!string.IsNullOrEmpty(cartDTO.CartHeader.CouponCode))
+                {
+                    var coupon = await _couponService.GetCoupon<ResponseDTO>(cartDTO.CartHeader.CouponCode, accessToken);
+                    if (coupon != null && coupon.IsSuccess)
+                    {
+                        var couponObj = JsonConvert.DeserializeObject<CouponDTO>(Convert.ToString(coupon.Result));
+                        cartDTO.CartHeader.DiscountTotal = couponObj.DiscountAmount;
+                    }
+                }
+
                 foreach (var detail in cartDTO.CartDetails)
                 {
                     cartDTO.CartHeader.OrderTotal += (detail.Product.Price * detail.Count);
-                }                
+                }
+                cartDTO.CartHeader.OrderTotal -= cartDTO.CartHeader.DiscountTotal;
             }
             return cartDTO;
         }
