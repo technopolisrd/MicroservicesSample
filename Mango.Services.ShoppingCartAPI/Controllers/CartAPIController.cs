@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers;
 
-[ApiController]
 [Route("api/cart")]
 public class CartAPIController : ControllerBase
 {
