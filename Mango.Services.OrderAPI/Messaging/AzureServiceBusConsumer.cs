@@ -4,7 +4,7 @@ using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Repository;
 using Newtonsoft.Json;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+//using Microsoft.Extensions.Configuration;
 
 namespace Mango.Services.OrderAPI.Messaging;
 
@@ -35,7 +35,7 @@ public class AzureServiceBusConsumer : IAzureServiceBusConsumer
 
     public async Task Start()
     {
-        checkOutProcesor.ProcessMessageAsync += OnCheckOutMessageReceive;
+        checkOutProcesor.ProcessMessageAsync += OnCheckOutMessageReceived;
         checkOutProcesor.ProcessErrorAsync += ErrorHandler;
         await checkOutProcesor.StartProcessingAsync();
     }
@@ -52,7 +52,7 @@ public class AzureServiceBusConsumer : IAzureServiceBusConsumer
         return Task.CompletedTask;
     }
 
-    private async Task OnCheckOutMessageReceive(ProcessMessageEventArgs args)
+    private async Task OnCheckOutMessageReceived(ProcessMessageEventArgs args)
     {
         var message = args.Message;
         var body = Encoding.UTF8.GetString(message.Body);

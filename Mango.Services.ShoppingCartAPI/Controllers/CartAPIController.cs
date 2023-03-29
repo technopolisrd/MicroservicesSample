@@ -124,8 +124,7 @@ public class CartAPIController : ControllerBase
     }
 
     [HttpPost("Checkout")]
-    [Authorize]
-    public async Task<object> Checkout(CheckoutHeaderDTO checkoutHeader)
+    public async Task<object> Checkout([FromBody] CheckoutHeaderDTO checkoutHeader)
     {
         try
         {

@@ -1,6 +1,4 @@
 ﻿using Mango.Services.OrderAPI.Messaging;
-using Microsoft.Extensions.DependencyInjection;
-using System.Reflection.Metadata;
 
 namespace Mango.Services.OrderAPI.Extension;
 

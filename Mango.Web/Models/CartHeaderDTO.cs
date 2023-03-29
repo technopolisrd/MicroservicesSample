@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Mango.Web.Models;
+﻿namespace Mango.Web.Models;
 
 public class CartHeaderDTO
 {
